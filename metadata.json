@@ -1,0 +1,6 @@
+{
+  "name": "Toon Tone",
+  "description": "Un divertido e interactivo juego de adivinar el tono exacto de los colores característicos de tus personajes animados favoritos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
