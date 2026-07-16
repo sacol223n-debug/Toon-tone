@@ -885,6 +885,26 @@ export default function App() {
                 /* Leaderboard renders smoothly inside mobile screen view */
                 <Leaderboard />
               )}
+
+              {/* Sponsored Content Block */}
+              <div id="sponsored-ad-card" className="mt-4 p-4 bg-[#FFF5F5] hover:bg-[#FFEAEB] border-2 border-zinc-950 rounded-2xl shadow-[3px_3px_0_0_#000] flex flex-col gap-2 transition-all cursor-pointer select-text shrink-0">
+                <div className="flex items-center gap-1.5 justify-center">
+                  <span className="w-2 h-2 bg-[#FF7675] border border-zinc-950 rounded-full animate-ping" />
+                  <span className="text-[9px] font-black uppercase text-zinc-500 font-mono tracking-widest">Enlace Patrocinado:</span>
+                </div>
+                <a 
+                  id="sponsored-offer-link"
+                  href="https://www.effectivecpmnetwork.com/cq2vq861uq?key=1b9adba0f8a61874cfcf3163e3898e01"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-black text-[#FF2E93] hover:text-[#e01d7a] hover:underline flex items-center justify-center gap-1 text-center leading-snug"
+                >
+                  🎁 ¡Consigue Skins de Toons y Premios Exclusivos Aquí! 🚀
+                </a>
+                <div className="text-[8.5px] text-center font-bold text-zinc-500">
+                  Visita nuestro socio verificado para desbloquear paletas especiales de color.
+                </div>
+              </div>
             </motion.div>
           )}
 
