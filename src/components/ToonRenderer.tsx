@@ -59,24 +59,24 @@ export const ToonRenderer: React.FC<ToonRendererProps> = ({
   // Si la imagen local existe, la renderizamos aplicando filtros en memoria
   if (imageExists === true) {
     return (
-      <div className="relative w-full h-full max-h-[350px] flex flex-col items-center justify-center p-4 bg-[#0e1424] rounded-[32px] border border-white/5 overflow-hidden">
+      <div className="relative w-full h-full max-h-[350px] flex flex-col items-center justify-center p-5 bg-[#FFFDF5] rounded-[32px] border-[3px] border-zinc-950 shadow-[4px_4px_0_0_#000] overflow-hidden">
         {/* Destello de fondo decorativo de la consola */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 via-transparent to-pink-500/10 blur-xl pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#FF7675]/10 via-transparent to-[#FDCB6E]/20 pointer-events-none" />
         
         <img 
           src={localImgPath} 
           alt={`Personaje ${characterId}`} 
-          className="max-h-[220px] object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] transition-all duration-300"
+          className="max-h-[220px] object-contain drop-shadow-[0_8px_0_rgba(0,0,0,0.15)] transition-all duration-300"
           style={{
             filter: showOriginal 
               ? "none" 
               : isMasked 
-                ? `drop-shadow(0 0 8px ${userColor})` // Brillo de color de usuario
+                ? `drop-shadow(0 0 10px ${userColor})` // Brillo de color de usuario
                 : "grayscale(100%) opacity(0.85)"
           }}
           referrerPolicy="no-referrer"
         />
-        <div className="absolute bottom-3 right-3 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[9px] font-mono px-2 py-0.5 rounded-lg uppercase tracking-widest font-black">
+        <div className="absolute bottom-3 right-3 bg-[#6C5CE7]/15 text-[#6C5CE7] border-2 border-zinc-950 text-[9px] font-mono px-2 py-0.5 rounded-lg uppercase tracking-widest font-black shadow-[1px_1px_0_0_#000]">
           Imagen PNG
         </div>
       </div>

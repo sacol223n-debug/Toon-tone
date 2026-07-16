@@ -104,16 +104,16 @@ export const Leaderboard: React.FC<LeaderboardProps> = () => {
   };
 
   const getDifficultyBadgeColor = (score: number) => {
-    if (score >= 9.5) return "bg-emerald-500/15 text-emerald-400 border-emerald-500/30";
-    if (score >= 8.5) return "bg-indigo-500/15 text-indigo-400 border-indigo-500/30";
-    return "bg-amber-500/15 text-amber-400 border-amber-500/30";
+    if (score >= 9.5) return "bg-[#55EFC4] text-zinc-950 border-2 border-zinc-950 shadow-[1px_1px_0_0_#000] font-black";
+    if (score >= 8.5) return "bg-[#74B9FF] text-zinc-950 border-2 border-zinc-950 shadow-[1px_1px_0_0_#000] font-black";
+    return "bg-[#FFEAA7] text-zinc-950 border-2 border-zinc-950 shadow-[1px_1px_0_0_#000] font-black";
   };
 
   return (
-    <div id="leaderboard-component" className="w-full bg-[#0e1424]/90 rounded-[32px] border border-white/5 p-6 backdrop-blur-md shadow-2xl flex flex-col gap-4">
-      <div className="flex justify-between items-center pb-2 border-b border-white/10">
-        <h3 className="text-sm font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
-          <Trophy className="w-4 h-4 text-amber-400 animate-pulse" />
+    <div id="leaderboard-component" className="w-full bg-[#FFFDF5] rounded-[32px] border-[3px] border-zinc-950 p-6 shadow-[5px_5px_0_0_#18181b] flex flex-col gap-4 text-zinc-900">
+      <div className="flex justify-between items-center pb-2 border-b-2 border-zinc-200">
+        <h3 className="text-sm font-[900] text-zinc-950 flex items-center gap-1.5 uppercase tracking-wide">
+          <Trophy className="w-4 h-4 text-amber-500 fill-current animate-pulse" />
           🏆 Leyendas del Tono
         </h3>
         
@@ -121,21 +121,21 @@ export const Leaderboard: React.FC<LeaderboardProps> = () => {
           type="button"
           onClick={clearScores}
           title="Borrar mi historial local"
-          className="p-1.5 text-slate-500 hover:text-rose-450 hover:bg-slate-800/40 rounded-full transition-all cursor-pointer"
+          className="p-1.5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 border-2 border-zinc-200 hover:border-zinc-950 rounded-lg transition-all cursor-pointer shadow-[1px_1px_0_0_#000] bg-white active:scale-95"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-black/40 p-1 rounded-xl border border-white/5 text-[11px]">
+      <div className="flex bg-zinc-100 p-1 rounded-xl border-2 border-zinc-950 text-[11px] shadow-[2px_2px_0_0_#000]">
         <button
           type="button"
           onClick={() => setActiveTab("top")}
-          className={`flex-1 py-1.5 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer ${
+          className={`flex-1 py-1.5 rounded-lg font-black uppercase tracking-wider transition-all cursor-pointer ${
             activeTab === "top"
-              ? "bg-indigo-600 text-white shadow-md font-black"
-              : "text-slate-400 hover:text-slate-200"
+              ? "bg-[#FF7675] text-white border-2 border-zinc-950 shadow-[1.5px_1.5px_0_0_#000]"
+              : "text-zinc-500 hover:text-zinc-900"
           }`}
         >
           Mejores
@@ -143,10 +143,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = () => {
         <button
           type="button"
           onClick={() => setActiveTab("recent")}
-          className={`flex-1 py-1.5 rounded-lg font-bold uppercase tracking-wider transition-all cursor-pointer ${
+          className={`flex-1 py-1.5 rounded-lg font-black uppercase tracking-wider transition-all cursor-pointer ${
             activeTab === "recent"
-              ? "bg-indigo-600 text-white shadow-md font-black"
-              : "text-slate-400 hover:text-slate-200"
+              ? "bg-[#6C5CE7] text-white border-2 border-zinc-950 shadow-[1.5px_1.5px_0_0_#000]"
+              : "text-zinc-500 hover:text-zinc-900"
           }`}
         >
           Recientes
@@ -154,9 +154,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = () => {
       </div>
 
       {/* Table List */}
-      <div className="flex flex-col gap-2 max-h-[340px] overflow-y-auto pr-1 select-none custom-scrollbar">
+      <div className="flex flex-col gap-3.5 max-h-[340px] overflow-y-auto pr-1 select-none custom-scrollbar">
         {scores.length === 0 ? (
-          <div className="text-center py-8 text-xs text-slate-550 font-mono">
+          <div className="text-center py-8 text-xs text-zinc-500 font-mono font-bold">
             Sin marcas registradas.
           </div>
         ) : (
@@ -165,42 +165,42 @@ export const Leaderboard: React.FC<LeaderboardProps> = () => {
             return (
               <div
                 key={entry.id}
-                className={`flex items-center justify-between p-3 rounded-2xl border transition-all duration-300 hover:translate-x-1 ${
+                className={`flex items-center justify-between p-3 rounded-2xl border-2 border-zinc-950 shadow-[3px_3px_0_0_#000] transition-all duration-300 hover:translate-x-1 ${
                   isLegend 
-                    ? "bg-slate-950/40 border-white/5" 
-                    : "bg-indigo-950/20 border-indigo-900/40"
+                    ? "bg-amber-50/50 hover:bg-amber-50" 
+                    : "bg-[#FF7675]/5 text-zinc-900"
                 }`}
               >
                 <div className="flex items-center gap-3">
                   {/* Position Badge */}
-                  <div className="flex items-center justify-center w-6 h-6 rounded-full font-extrabold text-xs">
+                  <div className="flex items-center justify-center w-6 h-6 rounded-full font-black text-xs">
                     {index === 0 ? (
                       <span className="text-yellow-400 text-base animate-bounce" title="1° Lugar">🥇</span>
                     ) : index === 1 ? (
-                      <span className="text-slate-300 text-base" title="2° Lugar">🥈</span>
+                      <span className="text-[#A4B0BE] text-base" title="2° Lugar">🥈</span>
                     ) : index === 2 ? (
                       <span className="text-amber-600 text-base" title="3° Lugar">🥉</span>
                     ) : (
-                      <span className="text-slate-500 font-mono">#{index + 1}</span>
+                      <span className="text-zinc-500 font-mono font-black">#{index + 1}</span>
                     )}
                   </div>
 
                   {/* Player Name and Date */}
                   <div className="flex flex-col">
-                    <span className="text-xs font-black text-slate-205 flex items-center gap-1.5">
+                    <span className="text-xs font-[900] text-zinc-950 flex items-center gap-1.5">
                       {entry.name}
                       {isLegend && (
-                        <span className="bg-amber-400/10 text-amber-400 border border-amber-450/20 text-[8px] px-1 rounded uppercase font-black tracking-widest">
-                          NPC
+                        <span className="bg-amber-200 text-zinc-950 border-2 border-zinc-950 text-[7px] px-1.5 py-0.25 rounded uppercase font-black tracking-widest shadow-[1px_1px_0_0_#000]">
+                          BOT
                         </span>
                       )}
                     </span>
-                    <span className="text-[9px] text-slate-450 font-mono flex items-center gap-1 truncate max-w-[160px] sm:max-w-xs mt-0.5">
+                    <span className="text-[9px] text-zinc-650 font-mono flex items-center gap-1 truncate max-w-[140px] sm:max-w-xs mt-1 font-bold">
                       <Clock className="w-2.5 h-2.5" />
                       {new Date(entry.date).toLocaleDateString("es-ES", {
                         day: "2-digit",
                         month: "short"
-                      })} - {entry.characterName}{entry.part ? ` (${entry.part})` : ""}
+                      })} - {entry.characterName}
                     </span>
                   </div>
                 </div>
@@ -210,19 +210,19 @@ export const Leaderboard: React.FC<LeaderboardProps> = () => {
                   {/* Visual Color Dots comparison */}
                   <div className="flex -space-x-1.5">
                     <div
-                      className="w-3.5 h-3.5 rounded-full border border-slate-950 shadow-sm"
+                      className="w-4 h-4 rounded-full border-2 border-zinc-950 shadow-sm"
                       style={{ backgroundColor: entry.userColor }}
                       title={`Tono jugado: ${entry.userColor}`}
                     />
                     <div
-                      className="w-3.5 h-3.5 rounded-full border border-slate-950 shadow-sm"
+                      className="w-4 h-4 rounded-full border-2 border-zinc-950 shadow-sm"
                       style={{ backgroundColor: entry.targetColor }}
                       title={`Tono objetivo: ${entry.targetColor}`}
                     />
                   </div>
                   
                   {/* Score badge */}
-                  <div className={`px-2 py-0.5 rounded-lg text-[11px] font-mono font-black border ${getDifficultyBadgeColor(entry.score)}`}>
+                  <div className={`px-2 py-0.5 rounded-lg text-[11px] font-mono font-black border-2 border-zinc-950 ${getDifficultyBadgeColor(entry.score)}`}>
                     {entry.score.toFixed(2)}
                   </div>
                 </div>
@@ -232,8 +232,8 @@ export const Leaderboard: React.FC<LeaderboardProps> = () => {
         )}
       </div>
 
-      <div className="text-[10px] text-slate-500 text-center font-mono">
-        Escanea la lista y supera tus marcas locales.
+      <div className="text-[10px] text-zinc-500 text-center font-mono font-bold">
+        Escanea la lista de récords y supera tus marcas locales.
       </div>
     </div>
   );

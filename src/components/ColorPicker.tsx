@@ -59,7 +59,28 @@ const hexToHsv = (hex: string) => {
   };
 };
 
+const hexToRgb = (hex: string) => {
+  let s = hex.replace("#", "");
+  if (s.length === 3) {
+    s = s.split("").map((x) => x + x).join("");
+  }
+  const r = parseInt(s.slice(0, 2), 16) || 0;
+  const g = parseInt(s.slice(2, 4), 16) || 0;
+  const b = parseInt(s.slice(4, 6), 16) || 0;
+  return { r, g, b };
+};
+
+const rgbToHex = (r: number, g: number, b: number): string => {
+  const clamp = (val: number) => Math.max(0, Math.min(255, val));
+  const toHex = (x: number) => {
+    const h = clamp(x).toString(16);
+    return h.length === 1 ? "0" + h : h;
+  };
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+};
+
 export const ColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => {
+  const [pickerMode, setPickerMode] = useState<"pad" | "rgb">("pad");
   const [hsv, setHsv] = useState({ h: 180, s: 50, v: 50 });
   const padRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -136,75 +157,270 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => 
   // Hue conversion gradient
   const currentHueBaseHex = hsvToHex(hsv.h, 100, 100);
 
+  const rgb = hexToRgb(color);
+
+  const handleRgbChange = (channel: "r" | "g" | "b", val: number) => {
+    const nextRgb = { ...rgb, [channel]: Math.max(0, Math.min(255, val)) };
+    onChange(rgbToHex(nextRgb.r, nextRgb.g, nextRgb.b));
+  };
+
+  const adjustChannelWithButton = (channel: "r" | "g" | "b", amount: number) => {
+    const nextVal = Math.max(0, Math.min(255, rgb[channel] + amount));
+    handleRgbChange(channel, nextVal);
+  };
+
   return (
-    <div id="custom-color-picker" className="flex flex-col items-center gap-5 w-full max-w-[320px]">
-      {/* Saturation/Value 2D Selector Pad */}
-      <div
-        ref={padRef}
-        onMouseDown={onMouseDown}
-        onTouchStart={onTouchStart}
-        className="relative w-full aspect-square rounded-2xl cursor-crosshair overflow-hidden touch-none select-none border-2 border-slate-700/50 shadow-inner"
-        style={{ backgroundColor: currentHueBaseHex }}
-      >
-        {/* White source light gradient (left-to-right) */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent" />
-        {/* Black shade gradient (bottom-to-top) */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-95" />
-
-        {/* Picker dot selector */}
-        <div
-          className="absolute w-6 h-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-lg pointer-events-none transition-[transform] duration-75 active:scale-125"
-          style={{
-            left: `${hsv.s}%`,
-            top: `${100 - hsv.v}%`,
-            backgroundColor: color,
-            boxShadow: "0 0 0 2px rgba(0,0,0,0.5), inset 0 0 4px rgba(0,0,0,0.15)",
-          }}
-        />
+    <div id="custom-color-picker" className="flex flex-col items-center gap-4.5 w-full max-w-[320px]">
+      
+      {/* Visual Toggler Selector */}
+      <div className="flex bg-[#EBF3FA] p-1 rounded-xl border-2 border-zinc-950 w-full shadow-[2px_2px_0_0_#000] text-[10px] uppercase font-black tracking-widest leading-none select-none">
+        <button
+          type="button"
+          onClick={() => setPickerMode("pad")}
+          className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer ${
+            pickerMode === "pad"
+              ? "bg-[#00B894] text-white border-2 border-zinc-950 shadow-[1.5px_1.5px_0_0_#000]"
+              : "text-zinc-500 hover:text-zinc-950"
+          }`}
+        >
+          🎛️ Panel Táctil
+        </button>
+        <button
+          type="button"
+          onClick={() => setPickerMode("rgb")}
+          className={`flex-1 py-1.5 rounded-lg transition-all cursor-pointer ${
+            pickerMode === "rgb"
+              ? "bg-[#6C5CE7] text-white border-2 border-zinc-950 shadow-[1.5px_1.5px_0_0_#000]"
+              : "text-zinc-500 hover:text-zinc-950"
+          }`}
+        >
+          🔬 Calibración RGB
+        </button>
       </div>
 
-      {/* Hue Slider */}
-      <div className="w-full flex flex-col gap-2">
-        <div className="flex justify-between items-center px-1 text-xs text-slate-400 font-mono">
-          <span>Matiz (Hue)</span>
-          <span>{hsv.h}°</span>
-        </div>
-        <div className="relative w-full h-[18px] rounded-full overflow-hidden border border-slate-700 cursor-pointer select-none">
-          <input
-            id="hue-slider-input"
-            type="range"
-            min="0"
-            max="360"
-            value={hsv.h}
-            onChange={(e) => updateColor(parseInt(e.target.value), hsv.s, hsv.v)}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-          />
+      {pickerMode === "pad" ? (
+        <>
+          {/* Saturation/Value 2D Selector Pad */}
           <div
-            className="w-full h-full"
-            style={{
-              background: "linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)",
-            }}
-          />
-          {/* Custom handle reflecting over the slider background */}
-          <div
-            className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-white pointer-events-none shadow"
-            style={{
-              left: `calc(${(hsv.h / 360) * 100}% - 8px)`,
-              backgroundColor: currentHueBaseHex,
-            }}
-          />
+            ref={padRef}
+            onMouseDown={onMouseDown}
+            onTouchStart={onTouchStart}
+            className="relative w-full aspect-square rounded-[24px] cursor-crosshair overflow-hidden touch-none select-none border-[3px] border-zinc-950 shadow-[4px_4px_0_0_#000]"
+            style={{ backgroundColor: currentHueBaseHex }}
+          >
+            {/* White source light gradient (left-to-right) */}
+            <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent" />
+            {/* Black shade gradient (bottom-to-top) */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-95" />
+
+            {/* Picker dot selector */}
+            <div
+              className="absolute w-6 h-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-zinc-950 shadow-md pointer-events-none transition-[transform] duration-75 active:scale-125"
+              style={{
+                left: `${hsv.s}%`,
+                top: `${100 - hsv.v}%`,
+                backgroundColor: color,
+                boxShadow: "0 0 0 2px rgba(255,255,255,0.8), inset 0 0 4px rgba(0,0,0,0.4)",
+              }}
+            />
+          </div>
+
+          {/* Hue Slider */}
+          <div className="w-full flex flex-col gap-1.5">
+            <div className="flex justify-between items-center px-1 text-[11px] text-zinc-700 font-extrabold uppercase tracking-tight">
+              <span>Matiz (Hue)</span>
+              <span className="font-mono bg-[#FFEAA7] px-2 py-0.5 border-2 border-zinc-950 rounded-md text-[10px] text-zinc-950 font-black shadow-[1px_1px_0_0_#000]">{hsv.h}°</span>
+            </div>
+            <div className="relative w-full h-[22px] rounded-full overflow-hidden border-[3px] border-zinc-950 shadow-[2px_2px_0_0_#000] cursor-pointer select-none">
+              <input
+                id="hue-slider-input"
+                type="range"
+                min="0"
+                max="360"
+                value={hsv.h}
+                onChange={(e) => updateColor(parseInt(e.target.value), hsv.s, hsv.v)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              <div
+                className="w-full h-full"
+                style={{
+                  background: "linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)",
+                }}
+              />
+              {/* Custom handle reflecting over the slider background */}
+              <div
+                className="absolute top-1/2 -translate-y-1/2 w-5.5 h-5.5 rounded-full border-[2.5px] border-zinc-950 pointer-events-none shadow"
+                style={{
+                  left: `calc(${(hsv.h / 360) * 100}% - 11px)`,
+                  backgroundColor: currentHueBaseHex,
+                }}
+              />
+            </div>
+          </div>
+        </>
+      ) : (
+        /* RGB Mode Precision Sliders Calibration Panel */
+        <div className="w-full flex flex-col gap-3.5 bg-[#FFFBEA] p-4.5 rounded-[24px] border-[3px] border-zinc-950 shadow-[4px_4px_0_0_#000]">
+          
+          {/* Channel Red */}
+          <div className="flex flex-col gap-1.5">
+            <div className="flex justify-between items-center text-[10px] font-black text-red-650 tracking-wide uppercase">
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#FF7675] border border-zinc-950" /> Rojo (Red)</span>
+              <span className="font-mono text-zinc-950 bg-white border-2 border-zinc-950 px-2 py-0.5 rounded shadow-[1px_1px_0_0_#000]">{rgb.r}</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("r", -10)}
+                className="w-8 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                -10
+              </button>
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("r", -1)}
+                className="w-7 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                -1
+              </button>
+              
+              <input
+                type="range"
+                min="0"
+                max="255"
+                value={rgb.r}
+                onChange={(e) => handleRgbChange("r", parseInt(e.target.value))}
+                className="flex-1 accent-[#FF7675] cursor-pointer h-2 border-2 border-zinc-950 rounded-full bg-white shadow-inner"
+              />
+              
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("r", 1)}
+                className="w-7 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                +1
+              </button>
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("r", 10)}
+                className="w-8 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                +10
+              </button>
+            </div>
+          </div>
+
+          {/* Channel Green */}
+          <div className="flex flex-col gap-1.5 mt-0.5">
+            <div className="flex justify-between items-center text-[10px] font-black text-emerald-650 tracking-wide uppercase">
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#00B894] border border-zinc-950" /> Verde (Green)</span>
+              <span className="font-mono text-zinc-950 bg-white border-2 border-zinc-950 px-2 py-0.5 rounded shadow-[1px_1px_0_0_#000]">{rgb.g}</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("g", -10)}
+                className="w-8 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                -10
+              </button>
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("g", -1)}
+                className="w-7 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                -1
+              </button>
+              
+              <input
+                type="range"
+                min="0"
+                max="255"
+                value={rgb.g}
+                onChange={(e) => handleRgbChange("g", parseInt(e.target.value))}
+                className="flex-1 accent-[#00B894] cursor-pointer h-2 border-2 border-zinc-950 rounded-full bg-white shadow-inner"
+              />
+              
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("g", 1)}
+                className="w-7 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                +1
+              </button>
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("g", 10)}
+                className="w-8 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                +10
+              </button>
+            </div>
+          </div>
+
+          {/* Channel Blue */}
+          <div className="flex flex-col gap-1.5 mt-0.5">
+            <div className="flex justify-between items-center text-[10px] font-black text-indigo-650 tracking-wide uppercase">
+              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#54A0FF] border border-zinc-950" /> Azul (Blue)</span>
+              <span className="font-mono text-zinc-950 bg-white border-2 border-zinc-950 px-2 py-0.5 rounded shadow-[1px_1px_0_0_#000]">{rgb.b}</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("b", -10)}
+                className="w-8 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                -10
+              </button>
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("b", -1)}
+                className="w-7 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                -1
+              </button>
+              
+              <input
+                type="range"
+                min="0"
+                max="255"
+                value={rgb.b}
+                onChange={(e) => handleRgbChange("b", parseInt(e.target.value))}
+                className="flex-1 accent-[#54A0FF] cursor-pointer h-2 border-2 border-zinc-950 rounded-full bg-white shadow-inner"
+              />
+              
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("b", 1)}
+                className="w-7 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                +1
+              </button>
+              <button 
+                type="button" 
+                onClick={() => adjustChannelWithButton("b", 10)}
+                className="w-8 h-8 rounded-lg bg-white hover:bg-zinc-100 border-2 border-zinc-950 text-[10px] font-black shadow-[1px_1px_0_0_#000] active:translate-y-0.5 active:shadow-none cursor-pointer"
+              >
+                +10
+              </button>
+            </div>
+          </div>
+
         </div>
-      </div>
+      )}
 
       {/* Sub-controls: swatches and typed code */}
-      <div className="w-full flex items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-        <div className="flex items-center gap-3">
+      <div className="w-full flex items-center justify-between gap-3 bg-white p-3.5 rounded-[22px] border-[3px] border-zinc-950 shadow-[4px_4px_0_0_#000]">
+        <div className="flex items-center gap-2.5">
           <div
-            className="w-10 h-10 rounded-lg border border-slate-700 shadow-sm transition-all duration-300"
+            className="w-10 h-10 rounded-xl border-2 border-zinc-950 shadow-[1px_1px_0_0_#000] transition-all duration-300"
             style={{ backgroundColor: color }}
           />
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Hexadecimal</span>
+            <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-extrabold font-mono">Hexadecimal</span>
             <input
               id="hex-string-input"
               type="text"
@@ -217,7 +433,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => 
               }}
               placeholder="#FFFFFF"
               maxLength={7}
-              className="bg-transparent text-sm font-mono font-semibold text-slate-200 outline-none w-20 tracking-wider focus:text-indigo-400"
+              className="bg-transparent text-sm font-mono font-black text-zinc-950 outline-none w-20 tracking-wider focus:text-[#6C5CE7]"
             />
           </div>
         </div>
@@ -231,7 +447,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ color, onChange }) => 
               onClick={() => onChange(tone)}
               style={{ backgroundColor: tone }}
               title={tone}
-              className="w-5 h-5 rounded-md border border-slate-950/40 opacity-70 hover:opacity-100 hover:scale-110 active:scale-95 transition-all cursor-pointer"
+              className="w-5.5 h-5.5 rounded-lg border-2 border-zinc-950 opacity-90 hover:opacity-100 hover:scale-115 active:scale-90 transition-all cursor-pointer shadow-[1px_1px_0_0_#000]"
             />
           ))}
         </div>
